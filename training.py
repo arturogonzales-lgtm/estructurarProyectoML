@@ -17,6 +17,7 @@ def infer_target_column(df: pd.DataFrame) -> str:
     lower_to_real = {column.lower(): column for column in df.columns}
     for candidate in TARGET_CANDIDATES:
         if candidate in lower_to_real:
+            
             return lower_to_real[candidate]
     raise ValueError(
         "No se encontró columna objetivo. "
