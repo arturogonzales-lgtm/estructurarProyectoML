@@ -7,12 +7,31 @@ Rúbrica de evaluación:
  - Buenas prácticas (funciones, docstrings, PEP8) : 3 puntos
 """
 
+import sys
+from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
+
 import preprocessing as pp
 import monitoring as mn
 import training as tr
 
 # Reemplazar con la ruta real del dataset
-DATA_PATH = "resources/data/WA_Fn-UseC_-Telco-Customer-Churn.csv"
+DATA_PATH = "resources/data/Data_CU_venta.csv"
+
+
+class Tee:
+    """Duplica la salida hacia múltiples streams (terminal + archivo)."""
+
+    def __init__(self, *streams):
+        self.streams = streams
+
+    def write(self, data):
+        for stream in self.streams:
+            stream.write(data)
+
+    def flush(self):
+        for stream in self.streams:
+            stream.flush()
 
 
 def main():
@@ -35,4 +54,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    log_dir = Path("resources/logs")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / "pipeline_output.txt"
+
+    with log_path.open("w", encoding="utf-8") as log_file:
+        stdout_tee = Tee(sys.__stdout__, log_file)
+        stderr_tee = Tee(sys.__stderr__, log_file)
+        with redirect_stdout(stdout_tee), redirect_stderr(stderr_tee):
+            main()
+
+    print(f"\nSalida del pipeline guardada en: {log_path}")
